@@ -1,0 +1,97 @@
+CPU RIA/1: The Adder
+ we will built our undestanding by starting with a minimal core. let's first construct an emulator that only supports a single instruction, ADDITION
+  - Becoming familiar with new terminology
+  - how to interpret opcodes
+  - undestanding the main loop
+
+TERMS RELATED TO CPU EMULATION
+ dealing with CPUs and emulation involves learning some terms. take a moment to look at and undestand the following
+    - an operation (op) refers to procedures taat are supported natively by the system. you might also encounter equivalent phrases such as implemented in hardware 
+      or intrinsic operation as yu explore further
+    - Registers are containers for data that the cpu accesses directly. for most operations, operands must be moved to registers for an operation to function.
+       for the CHIP-8, each register is a u8 value
+    - An opcode is a number that maps to an operation. on the CHIP-8 platform, opcodes include both the operation and the operand's registers
+
+DEFINING THE CPU
+  the first operation we want to support is addition. the operation takes 2 registers (x and y) as operands and adds value stored in y to x.
+
+  so far the CPU is inert. to perform addition we will need to take the following steps, but there is no ability to store data in memory as yet.
+    1, initialize a CPU
+    2, load u8 values to registers
+    3, load the addition opcode into current_operation
+    4, perform the operation
+
+    the constant "0x8014" - is the opcode that the CPU will interpret. to decode it, split it into four parts
+      - 8 signifies that the operation involves 2 registers
+      - 0 maps to cpu.registers[0]
+      - 1 maps to cpu.registers[1]
+      - 4 indicates addition
+
+UNDERSTANDING THE EMULATOR' MAIN LOOP 
+  now we have loaded the data. the CPU is almost able to do some work. the run() method performs the bulk of our emulator's work.
+   using the following steps, it emulates CPU-cycles
+     1, reads the opcode (eventully from memory)
+     2, decodes instructions
+     3, matches decoded instructions to known opcodes
+     4, dispatches execution of the operation to a specific function
+
+HOW TO INTERPRET CHIP-8 OPCODES 
+  it is important for our cpu to be able to interpret its opcode (0x8014). this section provides a throught explanation of the process used in the CHIP-8
+   and its naming conventions
+  CHIP-8 opcodes are u16 values madeup of 4 nibbles. A nibble is half of a byte(4 bit). b/c there is nota 4bit type in RUST, splitting u16 values into those parts is fiddly(complicated)
+   to make matters more complicated, CHIP-8 nibbles are often recombined to form either 8-bit or 12-bit values depending on the context
+  to simplify talking about the parts of each opcode, let's introduce some standard terminology. each opcode is made up of 2 bytes: the "high byte" and the "low byte".
+   And each byte is made up of 2 nibbles. the "high nibble" and the "low nibble", respectly.
+      0 x 7 3 E E 
+        7 3 - high byte(u8) -> 7 - high nibble(u4) 3 -> low nibble(u4)
+        E E - high byte(u8) -> E - high nibble(u4) E -> low nibble(u4)
+                    Opcode type: 7XNN → add immediate
+
+                    X: 3 → V3
+                    NN: 0xEE → 238 decimal
+
+                    Instruction:
+                    V3 = V3 + 0xEE  (no carry flag)
+
+                    Explanation:
+                    Adds an immediate value (NN) to a register.
+                    Unlike 8XYN, no second register is involved.
+
+        0 x 8 2 3 1
+         CHIP-8 uses nibble-based opcode encoding, and arithmetic/logical instructions are grouped under opcodes starting with 8 (8XYN). The last nibble (N) decides the specific operation.
+            Here’s the table for 8XYN again:
+
+                N	Operation
+                0	Vx = Vy
+                1	Vx = Vx OR Vy
+                2	Vx = Vx AND Vy
+                3	Vx = Vx XOR Vy
+                4	Vx = Vx + Vy (carry)
+                5	Vx = Vx - Vy (borrow)
+                6	Vx = Vx SHR 1
+                7	Vx = Vy - Vx
+                E	Vx = Vx SHL 1
+
+
+        *** To extract nibbles from bytes, we will ned to use the right shift(>>) and logical AND (&) bitwise operations.
+        for NNN and KK, you don’t need shifting at all, because they’re already sitting at the lowest bits of the opcode.
+
+        Why?
+        NNN = opcode & 0x0FFF
+        0x0FFF in binary = 0000 1111 1111 1111
+
+        Mask keeps the lowest 12 bits → address value
+        No shifting needed, because we want those bits as-is
+        KK = opcode & 0x00FF
+        0x00FF in binary = 0000 0000 1111 1111
+        Mask keeps the lowest 8 bits → immediate constant
+        No shifting needed, because KK already lives in the last two hex digits
+        Compare with X, Y, N
+        For these, the nibble is not aligned at the bottom — so you need a shift and a mask:
+        let x = (opcode >> 8) & 0xF;  // second nibble
+        let y = (opcode >> 4) & 0xF;  // third nibble
+        let n = opcode & 0xF;         // last nibble
+
+        ✅ Rule of thumb:
+        Use mask only for NNN and KK (since they’re already lowest bits).
+        Use shift + mask for X, Y, N (since they’re in the middle of the opcode).
