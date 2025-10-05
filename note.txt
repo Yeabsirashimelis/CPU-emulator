@@ -95,3 +95,34 @@ HOW TO INTERPRET CHIP-8 OPCODES
         ✅ Rule of thumb:
         Use mask only for NNN and KK (since they’re already lowest bits).
         Use shift + mask for X, Y, N (since they’re in the middle of the opcode).
+
+THE ADDER -is simple, just add what we have in our registers and put it in the first register
+
+THE MULTIPLIER - adder can execute a single instruction: addition. multiplier, can execute several instructions in sequence. the multiplier includes RAM, a working main loop,
+                  and a variable that indicates which instruction to execute next that we'll call position_in_memory.
+            how it works???
+
+            - Adds 4kb of memory
+            - includes a fully fledged main loop and stopping condition
+                at each step in the loop, memory at position_in_memory is accessed and decoded in to an opcode. position_in_memory is the incremented to the next memory address,
+            - removes the current_instruction field of the CPU  struct, which is replaced by section of the main loop that decodes bytes from memory
+            -writes the opcodes into memory
+
+EXPANDING THE CPU TO SUPPORT MEMORY 
+  we need to implement some modifications to make out CPU more useful. to start, the computer needs memory.
+
+  some features of the CPU are quite novel:
+   -having 16 registers means that a single hexadecimal number (0 to F) can address those. that allows all opcodes to be compactly represented
+      as u16 values
+   -the CHIP-8 only has 4096 bytes of RAM (0x1000 in hexadecimal). this allows CHIP-8's equivalent of a usize type to only be 12 bit wide: 2^12 = 4096.
+      those 12bits become the nnn variable discussed earlier
+
+  what I deviates from the standard practice in 2 ways
+     - what we call the "position_in_memory" is nomally reffered to as the "program counter"
+     - within the CHIP-8 specification, the first 512 bytes(0X200) are reserved for the system, while other bytes are available
+        for programs. this implementation relaxes that restrction.
+  READING OPCODES FROM MEMORY 
+    with the addition of memory within the CPU, the read_opcode() method requires updating. 
+  HANDLING INTEGER OVERFLOW
+     within the CHIP-8, we use the last register as a carry flag. when set, this flag indicates that an operation has overflowed the u8
+     register size
