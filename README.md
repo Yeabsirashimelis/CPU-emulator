@@ -66,7 +66,9 @@ Notes:
 - `stack` stores return addresses for subroutine calls.
 - `registers[0..F]` hold CPU data. `VF` is the carry/overflow flag.
 
-Usage
+---
+
+## Usage
 
 1, Clone the repository:
     git clone https://github.com/yourusername/chip8-rust.git
@@ -77,10 +79,21 @@ Usage
 Expected output:
     5 + (10 * 2) + (10 * 2) = 45
 
-Project Structure
+---
+
+## Project Structure
 cpu-emulator/
 ├── Cargo.toml
 └── src/
     ├── main.rs      # CPU setup and manual instruction loading
     ├── cpu.rs       # CPU struct and opcode implementations
     └── lib.rs       # exposes cpu module
+
+---
+
+## Future Improvements
+
+Implement the full set of CHIP-8 opcodes.
+Add a graphics and input system.
+Load external ROM files.
+Improve error handling for stack operations.
