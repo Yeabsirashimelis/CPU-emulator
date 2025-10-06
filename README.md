@@ -65,27 +65,26 @@ position_in_memory tracks the next instruction.
 stack stores return addresses for subroutine calls.
 
 registers[0..F] hold CPU data. VF is the carry/overflow flag.
+ 
+---
 
-Usage
-Clone the repository:
+## Usage
 
-bash
-Copy code
-git clone https://github.com/yourusername/chip8-rust.git
-cd chip8-rust
-Build and run:
+1, Clone the repository:
+    git clone https://github.com/yourusername/chip8-rust.git
+    cd chip8-rust
 
-bash
-Copy code
-cargo run
+2 , Build and run:
+    cargo run
+
 Expected output:
+    5 + (10 * 2) + (10 * 2) = 45
+    
+---
 
-Copy code
-5 + (10 * 2) + (10 * 2) = 45
-Project Structure
-bash
-Copy code
-chip8/
+## Project Structure
+
+cpu-emulator/
 ├── Cargo.toml
 └── src/
     ├── main.rs      # CPU setup and manual instruction loading
