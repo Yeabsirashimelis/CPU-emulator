@@ -18,10 +18,12 @@ implementation with stack management, registers, and basic opcode execution.
 
 ## Memory Setup
 
-Instructions are loaded manually into memory in main.rs, which allows testing CPU behavior without a full ROM loader.
+Instructions are **loaded manually into memory** in `main.rs`, which allows testing
+CPU behavior without a full ROM loader.
 
 Example sequence:
 
+```rust
 // CALL function at 0x100
 memory[0x000] = 0x21;
 memory[0x001] = 0x00;
