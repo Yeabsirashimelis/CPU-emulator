@@ -43,9 +43,9 @@ memory[0x102] = 0x80;
 memory[0x103] = 0x14;
 memory[0x104] = 0x00;
 memory[0x105] = 0xEE;
+
 CPU, Stack & Memory Overview
-sql
-Copy code
+
 Registers (V0..VF): [ V0=5, V1=10, ..., VF=0 ]
 
 Memory (partial view):
@@ -60,30 +60,24 @@ Stack (used for subroutine calls):
 SP=0 -> empty
 After first CALL -> 0x002
 After second CALL -> 0x004
-position_in_memory tracks the next instruction.
 
-stack stores return addresses for subroutine calls.
+Notes:
+- `position_in_memory` tracks the next instruction.
+- `stack` stores return addresses for subroutine calls.
+- `registers[0..F]` hold CPU data. `VF` is the carry/overflow flag.
 
-registers[0..F] hold CPU data. VF is the carry/overflow flag.
- 
----
-
-## Usage
+Usage
 
 1, Clone the repository:
     git clone https://github.com/yourusername/chip8-rust.git
     cd chip8-rust
-
-2 , Build and run:
+2, Build and run:
     cargo run
 
 Expected output:
     5 + (10 * 2) + (10 * 2) = 45
-    
----
 
-## Project Structure
-
+Project Structure
 cpu-emulator/
 ├── Cargo.toml
 └── src/
